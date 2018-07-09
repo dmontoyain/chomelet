@@ -4,6 +4,7 @@ const plaid = require('plaid');
 var bodyParser = require('body-parser');
 const envvar = require('envvar');
 var db = require('./models');
+var serviceroutes = require('./app/routes/serviceroutes.js');
 
 //db.sequelize.sync();
 
@@ -12,7 +13,6 @@ var db = require('./models');
 ** These environment variables listed need to be set in
 ** the server before starting the service.
 */
-
 var APP_PORT = envvar.number('APP_PORT', 8000);
 var PLAID_CLIENT_ID = envvar.string('PLAID_CLIENT_ID');
 var PLAID_SECRET = envvar.string('PLAID_SECRET');
@@ -23,6 +23,7 @@ var PLAID_ENV = envvar.string('PLAID_ENV', 'sandbox');
 var ACCESS_TOKEN = null;
 var PUBLIC_TOKEN = null;
 var ITEM_ID = null;
+var INSTITUTION_ID = null;
 
 /*
 ** Plaid client initialization:
@@ -48,114 +49,29 @@ app.use(bodyParser.json());
 //   .then(institute => {
 //     console.log(institute[0].id);
 //   })
-app.post('/createaccounts', function(request, response, next) {
-    
-    PUBLIC_TOKEN = request.body.public_token;
 
-    client.exchangePublicToken(PUBLIC_TOKEN, function(error, tokenResponse) {
-        if (error != null) {
-            var msg = 'Error: exchanging Plaid service public_token';
-            console.log(msg + '\n' + JSON.stringify(error));
-            return response.json({
-                error: msg
-            });
-        }
-
-        ACCESS_TOKEN = tokenResponse.access_token;
-        ITEM_ID = tokenResponse.item_id;
-
-        console.log('Access Token: ' + ACCESS_TOKEN);
-        console.log('Item ID: ' + ITEM_ID);
-        response.json({
-            'error': false
-        });
-
-        client.getItem(ACCESS_TOKEN, (error, itemResponse) => {
-            if (error != null) {
-                console.log(JSON.stringify(error));
-                return response.json({
-                    error: error
-                });
-            }
-
-            client.getInstitutionById(itemResponse.item.institution_id, (err, instrRes) => {
-                if (err != null) {
-                    var msg = 'Unable to pull institution information from the Plaid API.';
-                    console.log(msg + '\n' + JSON.stringify(error));
-                    return response.json({
-                      error: msg
-                    });
-                }
-
-                db.Institution.create({
-                  name: instrRes.institution.name,
-                  institution_id: instrRes.institution.institution_id
-                });
-
-                db.sequelize.query("SELECT id FROM `institutions` WHERE institutionid = '" + "instr.institution.institution_id" + "'", {type: db.sequelize.QueryTypes.SELECT})
-                .then(institute => {
-                  db.Item.create({
-                    itemid: ITEM_ID,
-                    access_token: ACCESS_TOKEN,
-                    user: request.body.userid,
-                    institution: institute[0].id
-                  });
-
-                });
-            });
-        });
-    });
-});
+serviceroutes(app, db, client);
   
-  app.get('/accounts', function(request, response, next) {
-    // Retrieve high-level account information and account and routing numbers
-    // for each account associated with the Item.
-    client.getAuth(ACCESS_TOKEN, function(error, authResponse) {
-      if (error != null) {
-        var msg = 'Unable to pull accounts from the Plaid API.';
-        console.log(msg + '\n' + JSON.stringify(error));
-        return response.json({
-          error: msg
-        });
-      }
+//   app.get('/accounts', function(request, response, next) {
+//     // Retrieve high-level account information and account and routing numbers
+//     // for each account associated with the Item.
+//     client.getAuth(ACCESS_TOKEN, function(error, authResponse) {
+//       if (error != null) {
+//         var msg = 'Unable to pull accounts from the Plaid API.';
+//         console.log(msg + '\n' + JSON.stringify(error));
+//         return response.json({
+//           error: msg
+//         });
+//       }
   
-      console.log(authResponse.accounts);
-      response.json({
-        error: false,
-        accounts: authResponse.accounts,
-        numbers: authResponse.numbers,
-      });
-    });
-  });
-  
-  app.post('/item', function(request, response, next) {
-    // Pull the Item - this includes information about available products,
-    // billed products, webhook information, and more.
-    client.getItem(ACCESS_TOKEN, function(error, itemResponse) {
-      if (error != null) {
-        console.log(JSON.stringify(error));
-        return response.json({
-          error: error
-        });
-      }
-  
-      // Also pull information about the institution
-      client.getInstitutionById(itemResponse.item.institution_id, function(err, instRes) {
-        if (err != null) {
-          var msg = 'Unable to pull institution information from the Plaid API.';
-          console.log(msg + '\n' + JSON.stringify(error));
-          return response.json({
-            error: msg
-          });
-        } else {
-          response.json({
-            item: itemResponse.item,
-            institution: instRes.institution,
-          });
-        }
-      });
-    });
-  });
+//       console.log(authResponse.accounts);
+//       response.json({
+//         error: false,
+//         accounts: authResponse.accounts,
+//         numbers: authResponse.numbers,
+//       });
+//     });
+//   });
   
 //   app.post('/transactions', function(request, response, next) {
 //     // Pull transactions for the Item for the last 30 days

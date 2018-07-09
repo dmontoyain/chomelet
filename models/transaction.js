@@ -20,6 +20,15 @@ module.exports = function(sequelize, DataTypes) {
         account: {
             type: DataTypes.STRING,
             allowNull: false
+        },
+        placecategory1: {
+            type: DataTypes.STRING   
+        },
+        placecategory2: {
+            type: DataTypes.STRING   
+        },
+        placecategory3: {
+            type: DataTypes.STRING   
         }
     }, {
             timestamps: false

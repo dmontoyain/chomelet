@@ -15,7 +15,11 @@ module.exports = function(sequelize, DataTypes) {
         user: {
             type: DataTypes.INTEGER,
             allowNull: false
-        }
+        },
+        accountid: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
     }, {
         timestamps: false
     });
