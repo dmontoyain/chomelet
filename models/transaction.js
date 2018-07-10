@@ -10,12 +10,17 @@ module.exports = function(sequelize, DataTypes) {
         },
         total: {
             type: DataTypes.DECIMAL(10, 2),
-            allowNull: false
+            allowNull: false,
+            defaultValue: 0.00
         },
         split: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 0
+        },
+        date: {
+            type: DataTypes.DATE,
+            allowNull: false
         },
         account: {
             type: DataTypes.STRING,
