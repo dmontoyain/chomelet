@@ -42,8 +42,6 @@ module.exports = function (app, db, client) {
 
                     db.sequelize.query("SELECT id FROM `institutions` WHERE institutionid = '" + instrRes.institution.institution_id + "'", {type: db.sequelize.QueryTypes.SELECT})
                     .then(foundinstitution => {
-//                        console.log(foundinstitution);
-//                        console.log(foundinstitution.length);
                         if (foundinstitution.length == 0) {
                             console("institute not found");
                             db.institution.create({
@@ -93,7 +91,32 @@ function saveTransaction(db, transact) {
             total: transact.amount,
             date: transact.date,
             account: account[0].id,
+            placecategory1: transact.category[0],
+            placecategory2: transact.category[1],
+            placecategory3: transact.category[2]
         });
+    });
+}
+
+function pullTransactions(app, db, client) {
+    var startDate = Moment().subtract(30, 'days').format('YYYY-MM-DD');
+    var endDate = Moment().format('YYYY-MM-DD');
+    
+    client.getTransactions(ACCESS_TOKEN, startDate, endDate, {
+        count: 20,
+        offset: 0,
+    },
+    function(error, transactionsResponse) {
+        if (error != null) {
+            console.log(JSON.stringify(error));
+            return response.json({
+                error: error
+            });
+        }
+
+        for (var j = 0; j < 14; j++) {
+            saveTransaction(db, transactionsResponse.transactions[j]);
+        }
     });
 }
 
@@ -123,27 +146,7 @@ function pullAuth(userid, app, db, client) {
                         
                         })
                         .then(newaccount => {
-                            var startDate = Moment().subtract(30, 'days').format('YYYY-MM-DD');
-                            var endDate = Moment().format('YYYY-MM-DD');
-                            
-                            client.getTransactions(ACCESS_TOKEN, startDate, endDate, {
-                                count: 20,
-                                offset: 0,
-                            },
-                            function(error, transactionsResponse) {
-                                if (error != null) {
-                                    console.log(JSON.stringify(error));
-                                    return response.json({
-                                        error: error
-                                    });
-                                }
-
-                                //console.log(transactionsResponse.transactions[0]);
-                                for (var j = 0; j < 14; j++) {
-                                    saveTransaction(db, transactionsResponse.transactions[j]);
-                                }
-                            });
-                            //console.log(newaccount);
+                            pullTransactions(app, db, client);
                         });
                     }
                 }
