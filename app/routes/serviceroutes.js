@@ -98,12 +98,12 @@ function saveTransaction(db, transact) {
     });
 }
 
-function pullTransactions(app, db, client) {
+function pullTransactions(db, client) {
     var startDate = Moment().subtract(30, 'days').format('YYYY-MM-DD');
     var endDate = Moment().format('YYYY-MM-DD');
     
     client.getTransactions(ACCESS_TOKEN, startDate, endDate, {
-        count: 20,
+        count: 500,
         offset: 0,
     },
     function(error, transactionsResponse) {
@@ -126,8 +126,7 @@ function pullAuth(userid, app, db, client) {
         if (results.numbers.ach.length > 0) {
             db.sequelize.query("SELECT id FROM accounts WHERE user = " + userid + " AND accountno = '" + results.numbers.ach[0].account + "'", {type: db.sequelize.QueryTypes.SELECT})
             .then(account => {
-                if (account.length == 0)
-                {
+                if (account.length == 0) {
                     for (var i = 0; i < results.accounts.length; i++) {
 
                         db.account.create({
@@ -146,7 +145,7 @@ function pullAuth(userid, app, db, client) {
                         
                         })
                         .then(newaccount => {
-                            pullTransactions(app, db, client);
+                            pullTransactions(db, client);
                         });
                     }
                 }
