@@ -2,14 +2,14 @@
   "development": {
     "username": "root",
     "password": "",
-    "database": "chomelette",
+    "database": "",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
   "test": {
     "username": "root",
-    "password": "fsp",
-    "database": "chomelette",
+    "password": "",
+    "database": "",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
