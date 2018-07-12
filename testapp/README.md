@@ -1,3 +1,5 @@
+Most of the test code provided by Plaid.
+
 ### plaid-node quickstart
 
 [Quickstart guide](https://plaid.com/docs/quickstart)
