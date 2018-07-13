@@ -1,23 +1,23 @@
 {
   "development": {
     "username": "root",
-    "password": "",
+    "password": "chomeletdufumage",
     "database": "chomelette",
-    "host": "127.0.0.1",
+    "host": "35.203.143.31",
     "dialect": "mysql"
   },
   "test": {
     "username": "root",
-    "password": "fsp",
+    "password": "chomeletdufumage",
     "database": "chomelette",
-    "host": "127.0.0.1",
+    "host": "35.203.143.31",
     "dialect": "mysql"
   },
   "production": {
     "username": "root",
-    "password": null,
+    "password": "chomeletdufumage",
     "database": "database_production",
-    "host": "127.0.0.1",
+    "host": "35.203.143.31",
     "dialect": "mysql"
   }
 }
